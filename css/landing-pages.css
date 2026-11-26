@@ -1,0 +1,202 @@
+/* ==========================================================================
+   Parklane Real Estate — Persona & Utility Page Refinements (landing-pages.css)
+   All 5 pages share the Parklane design system with subtle editorial nuances.
+   ========================================================================== */
+
+/* Luxury Residences: Airier, refined architectural hairline accents (never dark/gold-heavy) */
+.page-luxury .split-hero__form-panel {
+  background-color: #fbfaf7;
+}
+
+.page-luxury .card {
+  border-color: #dfd8cc;
+}
+
+.page-luxury .hero-badge {
+  border-color: #dcd4c6;
+}
+
+/* Property Investment: Tabular numerals for crisp financial readability */
+.page-investment .calc-metric__value,
+.page-investment .editorial-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Affordable Homes: Clear budget-tier card accent */
+.page-affordable .budget-card__range {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  color: var(--color-brand-primary);
+}
+
+/* Bottom Conversion Banner (Consistent single primary CTA back to the lead form) */
+.cta-band {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-8);
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 768px) {
+  .cta-band {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-10) var(--space-12);
+  }
+}
+
+.cta-band__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  color: var(--color-text-inverse);
+  margin-bottom: var(--space-2);
+}
+
+.cta-band__text {
+  font-size: var(--text-sm);
+  color: var(--color-text-inverse-soft);
+  max-width: 54ch;
+}
+
+.cta-band .btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Campaign Hub (index.html) & Thank-You Page (thank-you.html)
+   -------------------------------------------------------------------------- */
+.hub-hero {
+  background-color: var(--color-bg-ivory);
+  padding-block: var(--space-12);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.hub-card {
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.hub-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.hub-card__thumb {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: var(--color-bg-dark);
+}
+
+.hub-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hub-card__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+/* Thank-You Page */
+.thank-you-main {
+  min-height: calc(100vh - var(--header-height) - 220px);
+  display: flex;
+  align-items: center;
+  padding-block: var(--space-12);
+  background-color: var(--color-bg-ivory);
+}
+
+.thank-you-card {
+  max-width: 680px;
+  margin-inline: auto;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .thank-you-card {
+    padding: var(--space-12);
+  }
+}
+
+.thank-you-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto var(--space-5);
+  border-radius: 50%;
+  background-color: var(--color-brand-sage-tint);
+  color: var(--color-brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thank-you-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.thank-you-summary {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background-color: var(--color-bg-ivory);
+  border-radius: var(--radius-md);
+  text-align: left;
+  font-size: var(--text-sm);
+}
+
+.thank-you-summary dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+@media (min-width: 520px) {
+  .thank-you-summary dl {
+    grid-template-columns: 140px 1fr;
+    gap: var(--space-2) var(--space-4);
+  }
+}
+
+.thank-you-summary dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.thank-you-summary dd {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.thank-you-actions {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.thank-you-actions .btn {
+  width: auto;
+}

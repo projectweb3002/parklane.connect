@@ -1,0 +1,15 @@
+PARKLANE GOOGLE SHEETS INTEGRATION
+
+1. Replace the current Code.gs in your spreadsheet-bound Apps Script project with Parklane_Lead_Automation_Code.gs.
+2. Save, then Deploy > Manage deployments > Edit > New version > Deploy.
+3. Keep the existing /exec URL (it is already configured in config/config.js).
+4. In Google Sheets, add these extra headers after Status (column M), starting at N1:
+Purchase Timeline | Purchase Objective | Family Size | Preferred Facilities | Referrer | UTM Medium | UTM Content | UTM Term | Privacy Consent
+5. Upload/deploy the entire parklane-landing-pages folder to your website, preserving its folder structure.
+6. Before sending paid traffic, submit one real test lead from each page and confirm each appears in the Leads sheet.
+7. The browser uses fetch(no-cors), so it cannot read the Apps Script response. A browser-side success/redirect is not proof of a row being saved; verify in the Sheet during testing.
+
+SECURITY / OPERATIONS
+- The Web App endpoint is public. Add server-side spam controls (e.g. honeypot + rate limiting / CAPTCHA) before scaling paid traffic.
+- Do not put private API keys in frontend files.
+- Ensure your privacy notice accurately explains collection and use of lead details.
