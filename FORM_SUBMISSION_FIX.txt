@@ -1,0 +1,26 @@
+PARKLANE FORM SUBMISSION FIX
+
+Why the previous error appeared:
+The previous frontend used fetch(..., mode: "no-cors") to post to Google Apps Script.
+Apps Script ContentService can redirect the request, and some browsers reject that
+cross-origin fetch/redirect with a TypeError. The UI then displayed an internet error.
+
+What changed:
+- Forms now submit using a native POST form targeted to a hidden iframe.
+- This avoids trying to read a cross-origin Apps Script response and avoids the fetch
+  CORS/redirect rejection that caused the misleading error.
+- UTM values and all existing form fields are still included in the POST body.
+- The existing Google Sheets column order is not changed by this frontend fix.
+
+Deployment:
+1. Replace the website files in the GitHub Pages publishing root with these files.
+2. No Code.gs change is required for this transport fix if the current deployed script
+   is the same one that already accepts URL-encoded POST parameters.
+3. Ensure the Apps Script deployment is a Web app, Execute as: Me, and access is set
+   to Anyone (or Anyone with the intended access policy).
+4. Test with a real enquiry and confirm a new row appears in the Leads sheet.
+
+Important limitation:
+A hidden-iframe POST cannot inspect the Apps Script JSON response, so the thank-you
+redirect confirms that the browser dispatched the POST, not that Sheets definitely
+stored the row. Always verify a test row in the sheet before advertising.

@@ -1,7 +1,7 @@
 /**
  * Parklane Real Estate — Lead Form Validation & Google Sheets Submission
  * Sends URL-encoded form data to the Parklane Google Apps Script Web App.
- * Uses no-cors because Apps Script does not expose a browser-readable CORS response.
+ * Uses a hidden iframe form POST to avoid fetch/CORS redirect failures with Apps Script.
  */
 (function () {
   "use strict";
@@ -143,21 +143,38 @@
       formData.set("source", attr.utm_source || "direct");
       formData.set("campaign", attr.utm_campaign || "");
 
-      const body = new URLSearchParams();
+      // Apps Script ContentService commonly redirects POST requests. A cross-origin
+      // fetch(no-cors) can reject on that redirect in some browsers. Submit a native
+      // HTML form into a hidden iframe instead; this avoids CORS response restrictions.
+      let iframe = document.getElementById("parklane-submit-frame");
+      if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.id = "parklane-submit-frame";
+        iframe.name = "parklane-submit-frame";
+        iframe.hidden = true;
+        iframe.setAttribute("aria-hidden", "true");
+        document.body.appendChild(iframe);
+      }
+
+      const transportForm = document.createElement("form");
+      transportForm.method = "POST";
+      transportForm.action = endpoint;
+      transportForm.target = iframe.name;
+      transportForm.enctype = "application/x-www-form-urlencoded";
+      transportForm.acceptCharset = "UTF-8";
+      transportForm.style.display = "none";
+
       formData.forEach(function (value, key) {
-        body.append(key, String(value));
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = key;
+        hidden.value = String(value);
+        transportForm.appendChild(hidden);
       });
 
-      // Apps Script ContentService responses are opaque to cross-origin browser fetch.
-      // A resolved no-cors request confirms dispatch, not that a Sheet row was written.
-      fetch(endpoint, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-        body: body.toString()
-      }).then(function () {
-        // The browser cannot inspect Apps Script's response in no-cors mode.
-        // Do not count this dispatch as a verified lead conversion.
+      document.body.appendChild(transportForm);
+      try {
+        transportForm.submit();
         if (window.ParklaneTracking) {
           window.ParklaneTracking.trackFormDispatch(pageName, {
             preferred_city: formData.get("preferred_city") || "",
@@ -178,18 +195,20 @@
           }));
         } catch (_) {}
 
-        showStatus(statusEl, "success", "Your enquiry request has been sent for processing. Redirecting...");
+        showStatus(statusEl, "success", "Your enquiry has been submitted. Please wait...");
         window.setTimeout(function () {
+          transportForm.remove();
           window.location.href = "thank-you.html?source=" + encodeURIComponent(pageName);
-        }, 1200);
-      }).catch(function () {
+        }, 1800);
+      } catch (error) {
+        transportForm.remove();
         isSubmitting = false;
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.classList.remove("is-loading");
         }
-        showStatus(statusEl, "error", "We couldn't send your enquiry. Please check your internet connection and try again.");
-      });
+        showStatus(statusEl, "error", "We couldn't submit your enquiry. Please try again or contact us by phone.");
+      }
     });
   }
 
