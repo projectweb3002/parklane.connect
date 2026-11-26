@@ -7,12 +7,13 @@
  */
 window.PARKLANE_CONFIG = Object.freeze({
   brandName: "Parklane",
-  websiteUrl: "https://projectweb3002.github.io/parklane/index.html",
+  websiteUrl: "https://projectweb3002.github.io/parklane.connect/",
+  landingPagesBaseUrl: "https://projectweb3002.github.io/parklane.connect/",
   privacyPolicyUrl: "https://projectweb3002.github.io/parklane/privacy.html",
   termsUrl: "https://projectweb3002.github.io/parklane/terms.html",
 
-  // Lead Form Submission (Formspree initially; swap to CRM webhook later)
-  // Example: "https://formspree.io/f/xabcdefg"
+  // Lead Form Submission (Parklane Google Apps Script Web App)
+  // Keep this URL in sync with the deployed Apps Script /exec endpoint.
   googleAppsScriptEndpoint: "https://script.google.com/macros/s/AKfycbxmJ1M5dfLMnCiHYk9-F3j1EzqTO70TxP0DWIjRdpItDVBHv8juXDgKz7afgzgMVwFH/exec",
 
   // Contact Channels (replace with live numbers before publishing)

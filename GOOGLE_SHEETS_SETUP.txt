@@ -1,15 +1,41 @@
 PARKLANE GOOGLE SHEETS INTEGRATION
 
-1. Replace the current Code.gs in your spreadsheet-bound Apps Script project with Parklane_Lead_Automation_Code.gs.
-2. Save, then Deploy > Manage deployments > Edit > New version > Deploy.
-3. Keep the existing /exec URL (it is already configured in config/config.js).
-4. In Google Sheets, add these extra headers after Status (column M), starting at N1:
-Purchase Timeline | Purchase Objective | Family Size | Preferred Facilities | Referrer | UTM Medium | UTM Content | UTM Term | Privacy Consent
-5. Upload/deploy the entire parklane-landing-pages folder to your website, preserving its folder structure.
-6. Before sending paid traffic, submit one real test lead from each page and confirm each appears in the Leads sheet.
-7. The browser uses fetch(no-cors), so it cannot read the Apps Script response. A browser-side success/redirect is not proof of a row being saved; verify in the Sheet during testing.
+1. Replace the current Code.gs in your spreadsheet-bound Apps Script project with the supplied Parklane_Lead_Automation_Code_Fixed.gs.
+2. Save, then Deploy > Manage deployments > Edit > New version > Deploy. Keep the existing /exec deployment URL; it is already configured in config/config.js.
+3. The backend keeps the existing Leads sheet row/column mapping unchanged. It now validates name, Indian mobile number, optional email, and required privacy consent, and rejects submissions that fill the hidden anti-spam field.
+4. Upload/deploy the complete parklane-landing-pages folder to the GitHub Pages repository that publishes at https://projectweb3002.github.io/parklane.connect/ . Preserve the folder structure.
+5. Canonical URLs and Open Graph URLs now point to that publishing base. The Parklane main-site Privacy and Terms links remain pointed at the existing /parklane/ website. Confirm those two legal pages are live before campaigns.
+6. Before paid traffic, submit one test lead from each page and confirm all five appear in the existing Leads sheet with correct page and UTM attribution.
+
+TRACKING LIMITATION
+The browser uses fetch(no-cors) because Apps Script ContentService does not provide a browser-readable CORS response. A resolved request only confirms the browser dispatched the request; it cannot confirm that Apps Script appended a row. The frontend therefore records a GA4 form_submission_attempt event and does NOT fire Meta Lead or Google Ads conversion events from an unverified response. For verified conversion tracking, connect a server-side/CRM confirmation event or move to a CORS-enabled backend before counting submitted leads as conversions.
 
 SECURITY / OPERATIONS
-- The Web App endpoint is public. Add server-side spam controls (e.g. honeypot + rate limiting / CAPTCHA) before scaling paid traffic.
+- The Web App endpoint is public. The honeypot and server-side validation are basic safeguards, not a replacement for CAPTCHA or rate limiting if spam increases.
 - Do not put private API keys in frontend files.
-- Ensure your privacy notice accurately explains collection and use of lead details.
+- Ensure the live Privacy Policy accurately explains collection and use of lead details.
+
+UTM / CAMPAIGN TRACKING SETUP (IMPORTANT)
+The landing pages can only save campaign values that arrive in the landing-page URL. The updated tracking.js stores first-touch attribution in browser localStorage for up to 90 days, carries it between the five pages, and adds it to the lead form. The backend writes these values into the existing Source, Campaign, UTM Medium, UTM Content and UTM Term columns; no sheet columns are added or reordered.
+
+GOOGLE ADS
+In Google Ads, open Campaign settings > Additional settings > Campaign URL options > Final URL suffix and add:
+utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_id={campaignid}&utm_term={keyword}&utm_content={creative}
+
+This records the Google Ads campaign ID in the Campaign column (not its human-readable campaign name). To record a readable name instead, use a manually maintained campaign-specific utm_campaign value in the final URL/suffix, or map the campaign ID to its name in a separate reporting lookup. Keep Google Ads auto-tagging enabled as well.
+
+META ADS
+At the Ad level, open Tracking > URL parameters and add:
+utm_source={{site_source_name}}&utm_medium=paid_social&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}
+
+For campaign-level naming, Meta's {{campaign.name}} macro is recorded in the Campaign column. Use valid Meta parameter macros exactly as shown.
+
+TEST BEFORE SPENDING
+1. Open a landing page with a test URL such as:
+   https://projectweb3002.github.io/parklane.connect/property-buyers.html?utm_source=google&utm_medium=cpc&utm_campaign=TEST-SEARCH-01&utm_term=3bhk+gurugram&utm_content=RSA-01
+2. Submit a test enquiry with privacy consent checked.
+3. Confirm the row has Source=google, Campaign=TEST-SEARCH-01, UTM Medium=cpc, UTM Term=3bhk gurugram and UTM Content=RSA-01.
+4. Navigate to another landing page in the same browser tab and submit another test lead without UTMs; the original attribution should remain attached for the 90-day attribution window.
+5. Remove the test lead from the sheet after verification if it is not a real enquiry.
+
+Note: A campaign name cannot be inferred from a plain URL or from a gclid alone. Ads must pass UTM campaign values (or campaign IDs) through their final URL settings.

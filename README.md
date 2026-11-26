@@ -20,12 +20,12 @@ Open `config/config.js` and replace the remaining placeholders:
 - `metaPixelId`: Meta Pixel ID.
 - `googleAdsConversionId` & `googleAdsConversionLabel`: Google Ads conversion ID (`AW-...`) and conversion label.
 - `images`: replace files in `assets/images/` or use hosted CDN URLs.
-- Canonical URLs: replace `https://YOUR_DOMAIN.com/...` in each page after the final public deployment URL is confirmed.
+- Canonical URLs: configured for `https://projectweb3002.github.io/parklane.connect/` and each page path.
 
 The Google Apps Script `/exec` endpoint is already configured. Keep it unchanged unless you deploy a replacement web app. The two supplied official Parklane mark variants are used for the white header/footer mark and black favicon.
 
 ## Tracking Events Wired
-- **GA4**: `page_view`, `form_start`, `form_submit` (the browser cannot verify the Apps Script response in `no-cors` mode), `whatsapp_click`, `phone_click`, `investment_calculator_used`. (`qualified_lead` is intentionally reserved for backend/CRM verification.)
+- **GA4**: `page_view`, `form_start`, `form_submission_attempt` (the browser cannot verify the Apps Script response in `no-cors` mode), `whatsapp_click`, `phone_click`, `investment_calculator_used`. (`qualified_lead` is intentionally reserved for backend/CRM verification.)
 - **Meta Pixel**: `PageView`, `Lead` (sent after the browser POST resolves; verify receipt in the Sheet), `Contact`.
 - **Google Ads**: Conversion event sent after the browser POST resolves; verify receipt in the Sheet.
 - **UTM Attribution**: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, and `referrer` are captured into `sessionStorage` and attached automatically to every lead submission.

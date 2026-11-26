@@ -114,37 +114,37 @@
 
     const PERSONA_MESSAGES = {
       "property-buyers": {
-        eyebrow: "ENQUIRY RECEIVED",
-        title: "We've Received Your Property Preferences.",
-        body: "A Parklane property advisor will review your requirements and reach out with curated residential options across your preferred location.",
+        eyebrow: "ENQUIRY REQUEST SENT",
+        title: "Thank You for Your Property Enquiry.",
+        body: "Your enquiry request has been sent for processing. A Parklane property advisor will review the details and contact you if the submission is successfully recorded.",
         returnHref: "property-buyers.html",
         returnLabel: "Back to Property Discovery"
       },
       "affordable-homes": {
-        eyebrow: "BUDGET SHORTLIST REQUESTED",
-        title: "Your Budget-Friendly Home Search Is Underway.",
-        body: "Our advisor is reviewing your configuration and budget preferences to share practical, value-focused residential options.",
+        eyebrow: "BUDGET ENQUIRY SENT",
+        title: "Thank You for Your Budget-Friendly Home Enquiry.",
+        body: "Your enquiry request has been sent for processing. Our advisor will review your configuration and budget preferences if the submission is successfully recorded.",
         returnHref: "affordable-homes.html",
         returnLabel: "Back to Affordable Homes"
       },
       "luxury-residences": {
-        eyebrow: "PRIVATE CONSULTATION REQUESTED",
-        title: "Thank You for Requesting a Private Consultation.",
-        body: "A senior Parklane advisor will connect with you discreetly to discuss your residence criteria and arrange a personalised shortlist.",
+        eyebrow: "CONSULTATION ENQUIRY SENT",
+        title: "Thank You for Your Private Consultation Enquiry.",
+        body: "Your enquiry request has been sent for processing. A senior Parklane advisor will review your residence criteria and contact you if the submission is successfully recorded.",
         returnHref: "luxury-residences.html",
         returnLabel: "Back to Luxury Residences"
       },
       "property-investment": {
-        eyebrow: "INVESTMENT BRIEF RECEIVED",
-        title: "Your Investment Goals Are With Our Advisory Team.",
-        body: "Our advisor will prepare location insights and residential property comparisons aligned with your investment objective and timeline.",
+        eyebrow: "INVESTMENT ENQUIRY SENT",
+        title: "Thank You for Your Property Investment Enquiry.",
+        body: "Your enquiry request has been sent for processing. Our advisor will review your investment objective and timeline if the submission is successfully recorded.",
         returnHref: "property-investment.html",
         returnLabel: "Back to Property Investment"
       },
       "family-homes": {
-        eyebrow: "FAMILY HOME ENQUIRY RECEIVED",
-        title: "We're Looking for the Right Home for Your Family.",
-        body: "Our advisor will shortlist spacious, family-friendly residences that match your preferred neighbourhood and everyday priorities.",
+        eyebrow: "FAMILY HOME ENQUIRY SENT",
+        title: "Thank You for Your Family Home Enquiry.",
+        body: "Your enquiry request has been sent for processing. Our advisor will review your preferred neighbourhood and family requirements if the submission is successfully recorded.",
         returnHref: "family-homes.html",
         returnLabel: "Back to Family Homes"
       }
@@ -179,7 +179,7 @@
           ? "Thank You, " + lastEnquiry.firstName + ". " + content.title
           : content.title;
     }
-    if (bodyEl) bodyEl.textContent = content.body;
+    if (bodyEl) bodyEl.textContent = content.body + " If you do not hear from us within one business day, please submit your enquiry again or contact Parklane directly.";
     if (returnLink) {
       returnLink.href = content.returnHref;
       returnLink.textContent = content.returnLabel;

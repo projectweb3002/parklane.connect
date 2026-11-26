@@ -23,44 +23,74 @@
     const params = new URLSearchParams(window.location.search);
     let stored = {};
 
+    // Keep attribution across navigation and return visits (up to 90 days).
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) stored = JSON.parse(raw);
     } catch (_) {
       stored = {};
     }
 
-    const updated = {
-      utm_source: stored.utm_source || "",
-      utm_medium: stored.utm_medium || "",
-      utm_campaign: stored.utm_campaign || "",
-      utm_content: stored.utm_content || "",
-      utm_term: stored.utm_term || "",
-      referrer: stored.referrer || document.referrer || "direct"
-    };
+    const now = Date.now();
+    const isFresh = stored.captured_at && (now - Number(stored.captured_at)) < 90 * 24 * 60 * 60 * 1000;
+    if (!isFresh) stored = {};
 
+    const incoming = {};
     UTM_KEYS.forEach(function (key) {
-      const val = params.get(key);
-      if (val) {
-        updated[key] = val.trim();
-      }
+      const value = params.get(key);
+      if (value) incoming[key] = value.trim();
     });
 
+    // Accept common campaign parameter aliases as well as standard UTMs.
+    const campaignAlias = params.get("campaign") || params.get("campaign_id") || params.get("utm_id");
+    if (!incoming.utm_campaign && campaignAlias) incoming.utm_campaign = campaignAlias.trim();
+
+    const gclid = params.get("gclid") || params.get("gbraid") || params.get("wbraid") || "";
+    const fbclid = params.get("fbclid") || "";
+    let detectedSource = incoming.utm_source || "";
+    let detectedMedium = incoming.utm_medium || "";
+    if (!detectedSource && gclid) detectedSource = "google";
+    if (!detectedMedium && gclid) detectedMedium = "cpc";
+    if (!detectedSource && fbclid) detectedSource = "facebook";
+    if (!detectedMedium && fbclid) detectedMedium = "paid_social";
+
+    if (!detectedSource && document.referrer) {
+      try { detectedSource = new URL(document.referrer).hostname.replace(/^www\./, ""); }
+      catch (_) { detectedSource = "referral"; }
+    }
+    if (!detectedSource) detectedSource = "direct";
+
+    const hasNewCampaignClick = Object.keys(incoming).length > 0 || Boolean(gclid || fbclid);
+    const updated = Object.assign({}, stored, incoming);
+    updated.utm_source = incoming.utm_source || (hasNewCampaignClick ? detectedSource : (stored.utm_source || detectedSource));
+    updated.utm_medium = incoming.utm_medium || (hasNewCampaignClick ? detectedMedium : (stored.utm_medium || detectedMedium));
+    updated.utm_campaign = incoming.utm_campaign || stored.utm_campaign || "";
+    updated.utm_content = incoming.utm_content || stored.utm_content || "";
+    updated.utm_term = incoming.utm_term || stored.utm_term || "";
+    updated.referrer = stored.referrer || document.referrer || "direct";
+    updated.gclid = params.get("gclid") || stored.gclid || "";
+    updated.gbraid = params.get("gbraid") || stored.gbraid || "";
+    updated.wbraid = params.get("wbraid") || stored.wbraid || "";
+    updated.fbclid = params.get("fbclid") || stored.fbclid || "";
+    updated.captured_at = stored.captured_at || now;
+    updated.last_seen_at = now;
+
     try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      // Also mirror into session storage for compatibility with older page code.
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (_) {
-      // Ignore storage quota / private mode restrictions
+      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch (__) {}
     }
-
     return updated;
   }
 
   function getAttribution() {
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (_) {
-      // Fall through
+      // Fall through and capture the current URL.
     }
     return captureAttribution();
   }
@@ -159,15 +189,13 @@
 
   /**
    * Called after the browser POST promise resolves. With Apps Script fetch(no-cors),
-   * the response is opaque: this does NOT prove that a row was saved successfully.
-   * Verify test leads in Google Sheets. For reliable conversion measurement, fire
-   * confirmed conversions from the backend/CRM. `qualified_lead` remains backend-only.
+   * the response is opaque. Record only a dispatch attempt here; do not fire a
+   * Meta Lead or Google Ads conversion until a server/CRM-confirmed event exists.
    */
-  function trackFormSubmit(pageName, metadata) {
+  function trackFormDispatch(pageName, metadata) {
     if (firedLeadForms.has(pageName)) return;
     firedLeadForms.add(pageName);
 
-    const cfg = window.PARKLANE_CONFIG || {};
     const attr = getAttribution();
     const payload = Object.assign(
       {
@@ -179,21 +207,7 @@
       metadata || {}
     );
 
-    sendGAEvent("form_submit", payload);
-    sendMetaEvent("Lead", {
-      content_name: pageName,
-      content_category: "Real Estate Enquiry"
-    });
-
-    if (
-      typeof window.gtag === "function" &&
-      isConfigured(cfg.googleAdsConversionId) &&
-      isConfigured(cfg.googleAdsConversionLabel)
-    ) {
-      window.gtag("event", "conversion", {
-        send_to: cfg.googleAdsConversionId + "/" + cfg.googleAdsConversionLabel
-      });
-    }
+    sendGAEvent("form_submission_attempt", payload);
   }
 
   function trackWhatsappClick(pageName) {
@@ -229,7 +243,7 @@
   window.ParklaneTracking = {
     getAttribution: getAttribution,
     trackFormStart: trackFormStart,
-    trackFormSubmit: trackFormSubmit,
+    trackFormDispatch: trackFormDispatch,
     trackWhatsappClick: trackWhatsappClick,
     trackPhoneClick: trackPhoneClick,
     trackCalculatorUsed: trackCalculatorUsed,

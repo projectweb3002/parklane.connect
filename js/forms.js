@@ -133,13 +133,14 @@
       const attr = window.ParklaneTracking ? window.ParklaneTracking.getAttribution() : {};
       formData.set("landing_page", pageName);
       formData.set("submission_timestamp", new Date().toISOString());
-      formData.set("utm_source", attr.utm_source || "");
+      formData.set("utm_source", attr.utm_source || "direct");
       formData.set("utm_medium", attr.utm_medium || "");
       formData.set("utm_campaign", attr.utm_campaign || "");
       formData.set("utm_content", attr.utm_content || "");
       formData.set("utm_term", attr.utm_term || "");
       formData.set("referrer", attr.referrer || document.referrer || "direct");
-      formData.set("source", attr.utm_source || (attr.referrer ? "referral" : "direct"));
+      // These map to the existing Source and Campaign columns in the Leads sheet.
+      formData.set("source", attr.utm_source || "direct");
       formData.set("campaign", attr.utm_campaign || "");
 
       const body = new URLSearchParams();
@@ -147,8 +148,8 @@
         body.append(key, String(value));
       });
 
-      // Apps Script does not provide CORS headers for browser fetch.
-      // no-cors sends the form-encoded POST; the response is intentionally opaque.
+      // Apps Script ContentService responses are opaque to cross-origin browser fetch.
+      // A resolved no-cors request confirms dispatch, not that a Sheet row was written.
       fetch(endpoint, {
         method: "POST",
         mode: "no-cors",
@@ -156,9 +157,9 @@
         body: body.toString()
       }).then(function () {
         // The browser cannot inspect Apps Script's response in no-cors mode.
-        // Confirm receipt in the Google Sheet during launch testing.
+        // Do not count this dispatch as a verified lead conversion.
         if (window.ParklaneTracking) {
-          window.ParklaneTracking.trackFormSubmit(pageName, {
+          window.ParklaneTracking.trackFormDispatch(pageName, {
             preferred_city: formData.get("preferred_city") || "",
             budget: formData.get("budget") || "",
             property_type: formData.get("property_type") || ""
@@ -177,7 +178,7 @@
           }));
         } catch (_) {}
 
-        showStatus(statusEl, "success", "Thank you. Your enquiry is being submitted. Redirecting...");
+        showStatus(statusEl, "success", "Your enquiry request has been sent for processing. Redirecting...");
         window.setTimeout(function () {
           window.location.href = "thank-you.html?source=" + encodeURIComponent(pageName);
         }, 1200);
